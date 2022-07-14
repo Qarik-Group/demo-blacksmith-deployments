@@ -1,0 +1,75 @@
+---
+kit:
+  name: dev 
+  version: latest
+  features:
+    - external-bosh
+    - broker-tls
+    - rabbitmq
+    - rabbitmq-tls
+    - rabbitmq-dual-mode
+    - rabbitmq-dashboard-registration
+    #- rabbitmq-network-override
+    #- redis
+    #- redis-tls
+    #- postgresql
+
+releases:
+  - name:    blacksmith
+    version: latest
+  - name:    rabbitmq-forge
+    version: latest
+  - name:    routing
+    version: latest
+
+meta:
+  rabbitmq_plans:
+    standalone: (( delete ))
+  size: default
+
+params:
+  env:     dev
+  vm_type: blacksmith
+  net:     blacksmith
+  network: blacksmith
+  blacksmith_debug: true
+
+  rabbitmq:
+    network: blacksmith
+  # secret/dev/bosh/users/blacksmith
+  # external_bosh_username: (( vault "secret/exodus/dev/bosh:admin_username" ))
+  # external_bosh_password: (( vault "secret/exodus/dev/bosh:admin_password" ))
+  # external_bosh_cacert:   (( vault "secret/exodus/dev/bosh:ca_cert" ))
+
+  ip: 10.4.26.6
+
+  # blacksmith-redis-small
+  # blacksmith-redis-medium
+  # blacksmith-redis-large
+
+instance_groups:
+- name: blacksmith
+  jobs:
+  - name: rabbitmq-blacksmith-plans
+    release: rabbitmq-forge
+    properties:
+      plans:
+        dedicated-small:
+          type: standalone
+          vm_type: blacksmith-rabbitmq-medium # -large
+          network: blacksmith
+          name: "small_dedicated"
+          limit: 0
+          description: |
+            A single node RabbitMQ with 30GB of persistent storage
+          instances: 1
+        cluster-small:
+          type: cluster
+          vm_type: blacksmith-rabbitmq-medium # -large
+          network: blacksmith
+          name: "small_cluster"
+          limit: 1
+          description: |
+            A three(3) node RabbitMQ cluster with 30GB of persistent storage
+          instances: 3
+

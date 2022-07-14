@@ -1,0 +1,4 @@
+- path: /instance_groups/name=blacksmith/jobs/name=rabbitmq-blacksmith-plans/properties/rabbitmq/network?
+  type: replace
+  value:
+    blacksmith

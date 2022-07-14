@@ -1,0 +1,375 @@
+azs:
+- cloud_properties:
+    availability_zone: us-west-2a
+  name: z1
+- cloud_properties:
+    availability_zone: us-west-2b
+  name: z2
+- cloud_properties:
+    availability_zone: us-west-2c
+  name: z3
+compilation:
+  az: z1
+  network: default
+  reuse_compilation_vms: true
+  vm_type: large
+  workers: 5
+disk_types:
+- cloud_properties:
+    type: gp2
+  disk_size: 3000
+  name: default
+- cloud_properties:
+    type: gp2
+  disk_size: 50000
+  name: large
+- cloud_properties:
+    type: gp2
+  disk_size: 32000
+  name: bosh
+exodus:
+  bosh: uswest2demo
+  bosh_address: REDACTED
+  bosh_cacert: REDACTED
+  bosh_password: REDACTED
+  bosh_username: REDACTED
+  broker_password: REDACTED
+  broker_url: http://10.4.1.13:3000
+  broker_username: blacksmith
+  dated: 2022-03-22 15:35:16 +0000
+  deployer: nabramovitz
+  features: external-bosh,redis,rabbitmq,broker-tls,redis-tls
+  is_director: false
+  kit_is_dev: true
+  kit_name: blacksmith
+  kit_version: 0.12.0
+  use_create_env: false
+  vault_base: /secret/uswest2demo/blacksmith
+  version: 2.8.4
+genesis:
+  ci_mount: /secret/ci/
+  env: uswest2demo
+  exodus_mount: /secret/exodus/
+  exodus_path: uswest2demo/blacksmith
+  secrets_mount: /secret/
+  secrets_path: uswest2demo/blacksmith
+instance_groups:
+- azs:
+  - z1
+  instances: 1
+  jobs:
+  - name: blacksmith
+    properties:
+      bosh:
+        address: REDACTED
+        cloud-config: []
+        password: REDACTED
+        releases: []
+        stemcells: []
+        username: REDACTED
+      broker:
+        password: REDACTED
+        port: 80
+        tls:
+          certificate: REDACTED
+          enabled: true
+          key: REDACTED
+          port: 443
+        username: blacksmith
+      debug: false
+      env: uswest2demo
+      shareable: false
+    release: blacksmith
+  - name: redis-blacksmith-plans
+    properties:
+      plans:
+        standalone:
+          description: A dedicated Redis server, with no redundancy or replication
+          limit: 7
+          name: standalone
+          type: standalone
+          vm_type: default
+        standalone-6:
+          description: A dedicated Redis 6 server, with no redundancy or replication
+          limit: 7
+          name: standalone-6
+          type: standalone-6
+          vm_type: default
+      redis:
+        tls:
+          ca: REDACTED
+          ca_cert: REDACTED
+          ca_key: REDACTED
+          enabled: true
+      service:
+        description: A dedicated Redis instance, deployed on-demand
+        id: redis
+        limit: 0
+        name: redis
+        tags:
+        - blacksmith
+        - dedicated
+        - redis
+    release: redis-forge
+  - name: rabbitmq-blacksmith-plans
+    properties:
+      plans:
+        cluster_small:
+          description: |
+            A three(3)e node RabbitMQ cluster with 30GB of persistent storage
+          instances: 3
+          limit: 0
+          name: small-cluster
+          network: default
+          type: cluster
+          vm_type: large
+        dedicated_small:
+          description: |
+            A single node RabbitMQ with 30GB of persistent storage
+          instances: 1
+          limit: 0
+          name: small-dedicated
+          network: default
+          type: standalone
+          vm_type: large
+      service:
+        description: A dedicated RabbitMQ instance, deployed on-demand
+        id: rabbitmq
+        limit: 0
+        name: rabbitmq
+        tags:
+        - blacksmith
+        - dedicated
+        - rabbitmq
+    release: rabbitmq-forge
+  name: blacksmith
+  networks:
+  - name: default
+    static_ips:
+    - 10.4.1.13
+  persistent_disk: 20480
+  stemcell: default
+  vm_type: large
+kit:
+  features:
+  - external-bosh
+  - redis
+  - rabbitmq
+  - broker-tls
+  - redis-tls
+  name: dev
+  version: 0.12.0
+meta:
+  blacksmith_tls_certificate: REDACTED
+  blacksmith_tls_key: REDACTED
+  bosh_exodus_path: uswest2demo/blacksmith
+  bosh_exodus_src: '/secret/exodus/uswest2demo/blacksmith:'
+  default:
+    azs:
+    - z1
+    rabbitmq_plans:
+      standalone:
+        description: A dedicated RabbitMQ server, with no redundancy or replication
+        limit: 7
+        name: standalone
+        type: standalone
+        vm_type: default
+    rabbitmq_tags:
+    - blacksmith
+    - dedicated
+    - rabbitmq
+    redis_plans:
+      standalone:
+        description: A dedicated Redis server, with no redundancy or replication
+        limit: 7
+        name: standalone
+        type: standalone
+        vm_type: default
+      standalone-6:
+        description: A dedicated Redis 6 server, with no redundancy or replication
+        limit: 7
+        name: standalone-6
+        type: standalone-6
+        vm_type: default
+    redis_tags:
+    - blacksmith
+    - dedicated
+    - redis
+  default_bosh_exodus_path: uswest2demo/blacksmith
+  external_bosh_address: REDACTED
+  external_bosh_cacert: REDACTED
+  external_bosh_password: REDACTED
+  external_bosh_username: REDACTED
+  rabbitmq_plans:
+    standalone: (( delete ))
+  vault: /secret/uswest2demo/blacksmith
+name: uswest2demo-blacksmith
+networks:
+- name: default
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-0f56fcba8b1ba95b3
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.1.1
+    range: 10.4.1.0/24
+    reserved:
+    - 10.4.1.0-10.4.1.5
+    static:
+    - 10.4.1.6-10.4.1.16
+  - azs:
+    - z2
+    cloud_properties:
+      subnet: subnet-04066d0a30fd1c020
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.2.1
+    range: 10.4.2.0/24
+    reserved:
+    - 10.4.2.0-10.4.2.5
+    static:
+    - 10.4.2.6-10.4.2.16
+  - azs:
+    - z3
+    cloud_properties:
+      subnet: subnet-0f2b10a0d103f3c83
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.3.1
+    range: 10.4.3.0/24
+    reserved:
+    - 10.4.3.0-10.4.3.5
+    static:
+    - 10.4.3.6-10.4.3.16
+  type: manual
+- name: dev
+  subnets:
+  - azs:
+    - z1
+    cloud_properties:
+      subnet: subnet-0ea631cc3ad19e04f
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.16.1
+    range: 10.4.16.0/24
+    reserved:
+    - 10.4.16.0-10.4.16.3
+    static:
+    - 10.4.16.4-10.4.16.16
+  - azs:
+    - z2
+    cloud_properties:
+      subnet: subnet-09a05edb82702379b
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.17.1
+    range: 10.4.17.0/24
+    reserved:
+    - 10.4.17.0-10.4.17.3
+    static:
+    - 10.4.17.4-10.4.17.16
+  - azs:
+    - z3
+    cloud_properties:
+      subnet: subnet-0dd034854c197dc41
+    dns:
+    - 1.1.1.1
+    - 8.8.4.4
+    gateway: 10.4.18.1
+    range: 10.4.18.0/24
+    reserved:
+    - 10.4.18.0-10.4.18.3
+    static:
+    - 10.4.18.4-10.4.18.16
+  type: manual
+- name: vip
+  type: vip
+params:
+  cloud_config: []
+  env: uswest2demo
+  external_bosh_cacert: REDACTED
+  external_bosh_password: REDACTED
+  external_bosh_username: REDACTED
+  ip: 10.4.1.13
+  name: uswest2demo-blacksmith
+  network: default
+  rabbitmq_plans:
+    cluster_small:
+      description: |
+        A three(3)e node RabbitMQ cluster with 30GB of persistent storage
+      instances: 3
+      limit: 0
+      name: small-cluster
+      network: default
+      type: cluster
+      vm_type: large
+    dedicated_small:
+      description: |
+        A single node RabbitMQ with 30GB of persistent storage
+      instances: 1
+      limit: 0
+      name: small-dedicated
+      network: default
+      type: standalone
+      vm_type: large
+  releases:
+  - name: redis-forge
+    sha1: edbf7537977e04c77f8291c628023f9815d5e8c1
+    url: https://github.com/blacksmith-community/redis-forge-boshrelease/releases/download/v0.7.0/redis-forge-0.7.0.tgz
+    version: 0.7.0
+  - name: rabbitmq-forge
+    sha1: 3c4096834bc9c72c2499c2eb05ebbb53b2dc08b3
+    url: https://github.com/blacksmith-community/rabbitmq-forge-boshrelease/releases/download/v0.4.0/rabbitmq-forge-0.4.0.tgz
+    version: 0.4.0
+  stemcells: []
+  vm_type: large
+releases:
+- name: blacksmith
+  sha1: 65a12c44cad9766b798f2e7f3990127b90f39d59
+  url: https://github.com/blacksmith-community/blacksmith-boshrelease/releases/download/v1.5.0/blacksmith-1.5.0.tgz
+  version: 1.5.0
+- name: redis-forge
+  sha1: edbf7537977e04c77f8291c628023f9815d5e8c1
+  url: https://github.com/blacksmith-community/redis-forge-boshrelease/releases/download/v0.7.0/redis-forge-0.7.0.tgz
+  version: 0.7.0
+- name: rabbitmq-forge
+  sha1: 3c4096834bc9c72c2499c2eb05ebbb53b2dc08b3
+  url: https://github.com/blacksmith-community/rabbitmq-forge-boshrelease/releases/download/v0.4.0/rabbitmq-forge-0.4.0.tgz
+  version: 0.4.0
+stemcells:
+- alias: default
+  os: ubuntu-bionic
+  version: latest
+update:
+  canaries: 1
+  canary_watch_time: 30000-600000
+  max_errors: 1
+  max_in_flight: 1
+  serial: false
+  update_watch_time: 5000-600000
+vm_types:
+- cloud_properties:
+    ephemeral_disk:
+      size: 3000
+      type: gp2
+    instance_type: t2.micro
+  name: default
+- cloud_properties:
+    ephemeral_disk:
+      size: 30000
+      type: gp2
+    instance_type: m4.large
+  name: large
+- cloud_properties:
+    ephemeral_disk:
+      size: 25000
+      type: gp2
+    instance_type: t3.medium
+  name: bosh
